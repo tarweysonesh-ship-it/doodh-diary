@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🥛 Doodh Diary</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --milk:#FFFFFF; --blue-deep:#1A2B4A; --blue-mid:#2D4E8A;
+  --green:#2ECC71; --red:#E74C3C; --gold:#F4C430;
+  --shadow:0 8px 32px rgba(26,43,74,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Baloo 2','Noto Sans Devanagari',sans-serif;background:var(--blue-deep);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,#2d4e8a44 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,#ff6b3522 0%,transparent 50%);pointer-events:none;}
+.drops{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;}
+.drop{position:absolute;background:rgba(255,255,255,0.07);border-radius:50% 50% 50% 50%/60% 60% 40% 40%;animation:fall linear infinite;}
+@keyframes fall{0%{transform:translateY(-20px);opacity:0}10%{opacity:1}90%{opacity:.4}100%{transform:translateY(100vh);opacity:0}}
+.container{max-width:480px;margin:0 auto;padding:20px 16px 60px;position:relative;z-index:1;}
+
+/* Header */
+.header{text-align:center;padding:22px 0 14px;animation:slideDown .6s ease;}
+@keyframes slideDown{from{transform:translateY(-28px);opacity:0}to{transform:translateY(0);opacity:1}}
+.logo{font-size:52px;line-height:1;filter:drop-shadow(0 4px 10px rgba(255,255,255,.25));animation:bounce 2.5s ease-in-out infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.app-title{font-size:1.9rem;font-weight:800;color:white;letter-spacing:-.5px;margin-top:5px;}
+.app-subtitle{color:rgba(255,255,255,.45);font-size:.78rem;margin-top:2px;}
+
+/* Stats */
+.stats-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;animation:fadeUp .7s ease .2s both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.stat-card{background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.11);border-radius:14px;padding:11px 6px;text-align:center;}
+.stat-number{font-size:1.5rem;font-weight:800;color:white;line-height:1;}
+.stat-label{font-size:.65rem;color:rgba(255,255,255,.4);margin-top:3px;}
+
+/* Milkman bar */
+.milkman-bar{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:11px 13px;margin-bottom:12px;display:flex;align-items:center;gap:11px;}
+.milkman-avatar{width:38px;height:38px;background:linear-gradient(135deg,#f4c430,#ff6b35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;}
+.milkman-name{color:white;font-weight:700;font-size:.88rem;}
+.milkman-ph{color:rgba(255,255,255,.4);font-size:.72rem;}
+.notif-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(244,196,48,.15);border:1px solid rgba(244,196,48,.3);border-radius:20px;padding:2px 9px;font-size:.68rem;font-weight:700;color:var(--gold);white-space:nowrap;}
+
+/* Tabs */
+.tab-bar{display:flex;background:rgba(255,255,255,.07);border-radius:12px;padding:4px;margin-bottom:14px;border:1px solid rgba(255,255,255,.1);}
+.tab{flex:1;padding:8px 4px;text-align:center;border-radius:9px;color:rgba(255,255,255,.38);font-weight:700;font-size:.75rem;cursor:pointer;transition:all .2s;}
+.tab.active{background:white;color:var(--blue-deep);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+/* Notification banner */
+.notif-banner{background:rgba(244,196,48,.1);border:1px solid rgba(244,196,48,.28);border-radius:13px;padding:11px 13px;margin-bottom:13px;display:flex;align-items:center;gap:9px;}
+.notif-banner-text{color:rgba(255,255,255,.8);font-size:.78rem;flex:1;line-height:1.4;}
+.btn-allow{padding:6px 13px;border-radius:7px;border:none;background:var(--gold);color:var(--blue-deep);font-family:inherit;font-weight:800;font-size:.75rem;cursor:pointer;white-space:nowrap;}
+
+/* Alert box */
+.alert-box{background:linear-gradient(135deg,#E8440E,#c73000);border-radius:18px;padding:16px;margin-bottom:14px;color:white;display:none;animation:alertPulse 2s ease-in-out infinite;}
+@keyframes alertPulse{0%,100%{box-shadow:0 0 0 0 rgba(232,68,14,.35)}50%{box-shadow:0 0 0 9px rgba(232,68,14,0)}}
+.alert-title{font-size:.98rem;font-weight:800;margin-bottom:4px;}
+.alert-msg{font-size:.8rem;opacity:.88;margin-bottom:11px;line-height:1.4;}
+
+/* Acknowledge */
+.ack-bar{display:flex;align-items:center;gap:9px;background:rgba(0,0,0,.2);border-radius:10px;padding:8px 12px;margin-bottom:8px;}
+.ack-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.ack-dot.pending{background:#f4c430;animation:blink 1.1s ease-in-out infinite;}
+.ack-dot.read{background:#2ecc71;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.ack-main-text{color:white;font-size:.78rem;font-weight:700;}
+.ack-sub-text{color:rgba(255,255,255,.5);font-size:.68rem;margin-top:1px;}
+.btn-manual-ack{width:100%;padding:8px;border-radius:9px;border:1.5px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:white;font-family:inherit;font-weight:700;font-size:.78rem;cursor:pointer;transition:background .2s;margin-bottom:10px;}
+.btn-manual-ack:hover{background:rgba(255,255,255,.22);}
+.btn-manual-ack.done{background:rgba(46,204,113,.25);border-color:#2ecc71;cursor:default;}
+
+/* Audio section */
+.audio-section{display:flex;flex-direction:column;gap:6px;}
+.audio-opt{background:rgba(0,0,0,.18);border-radius:11px;padding:11px;}
+.audio-opt-label{font-weight:800;font-size:.85rem;margin-bottom:2px;}
+.audio-opt-sub{font-size:.7rem;opacity:.6;margin-bottom:8px;}
+.tts-row{display:flex;gap:7px;}
+.abtn{padding:8px 11px;border-radius:8px;border:1.5px solid rgba(255,255,255,.28);font-family:inherit;font-weight:700;font-size:.76rem;cursor:pointer;color:white;background:rgba(255,255,255,.18);transition:all .18s;}
+.abtn:hover{background:rgba(255,255,255,.28);transform:translateY(-1px);}
+.abtn.green{background:rgba(37,211,102,.28);border-color:rgba(37,211,102,.45);flex:1;}
+.audio-divider{text-align:center;margin:2px 0;color:rgba(255,255,255,.3);font-size:.68rem;font-weight:700;letter-spacing:2px;display:flex;align-items:center;gap:8px;}
+.audio-divider::before,.audio-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.1);}
+.rec-btn{width:100%;padding:10px;border-radius:9px;border:2px dashed rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:white;font-family:inherit;font-weight:700;font-size:.82rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
+.rec-btn:hover{background:rgba(255,255,255,.15);}
+.rec-btn.recording{background:rgba(231,76,60,.28);border-color:#e74c3c;border-style:solid;animation:recPulse 1s ease-in-out infinite;}
+@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(231,76,60,.35)}50%{box-shadow:0 0 0 7px rgba(231,76,60,0)}}
+.rec-timer{text-align:center;margin-top:5px;font-size:.76rem;font-weight:700;color:rgba(255,255,255,.7);display:none;}
+.share-text-btn{width:100%;margin-top:8px;padding:8px;border-radius:9px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);font-family:inherit;font-weight:700;font-size:.75rem;cursor:pointer;transition:background .2s;}
+.share-text-btn:hover{background:rgba(255,255,255,.13);}
+
+/* Today card */
+.today-card{background:var(--milk);border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow);position:relative;overflow:hidden;animation:fadeUp .7s ease .3s both;}
+.today-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.today-label{font-size:.7rem;font-weight:700;color:var(--blue-mid);text-transform:uppercase;letter-spacing:1px;}
+.today-date-txt{font-size:.8rem;color:#888;font-weight:600;}
+.qty-section{display:flex;align-items:center;justify-content:center;gap:16px;margin:10px 0;}
+.qty-btn{width:40px;height:40px;border-radius:50%;border:none;background:var(--blue-deep);color:white;font-size:1.25rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .14s;box-shadow:0 3px 10px rgba(26,43,74,.22);}
+.qty-btn:hover{transform:scale(1.1);}
+.qty-btn:active{transform:scale(.93);}
+.qty-num{font-size:2.4rem;font-weight:800;color:var(--blue-deep);line-height:1;text-align:center;}
+.qty-unit{font-size:.75rem;color:#888;font-weight:600;text-align:center;}
+
+/* Inline price editor */
+.price-row{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 13px;background:#f4f7ff;border-radius:11px;padding:9px 12px;flex-wrap:wrap;}
+.price-lbl{font-size:.78rem;color:#666;font-weight:600;}
+.price-inp{border:1.5px solid #dde3f5;border-radius:7px;padding:5px 9px;font-family:inherit;font-weight:800;font-size:.95rem;color:var(--blue-deep);width:82px;text-align:center;background:white;transition:border-color .2s;}
+.price-inp:focus{outline:none;border-color:var(--blue-mid);}
+.price-preview{font-size:.8rem;color:#888;font-weight:700;}
+.action-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.btn{padding:12px;border-radius:12px;border:none;font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.btn-take{background:linear-gradient(135deg,var(--green),#27ae60);color:white;box-shadow:0 5px 16px rgba(46,204,113,.28);}
+.btn-skip{background:linear-gradient(135deg,var(--red),#c0392b);color:white;box-shadow:0 5px 16px rgba(231,76,60,.28);}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.05);}
+.btn:active{transform:translateY(0);}
+.btn.ring-take{outline:3px solid var(--green);outline-offset:2px;}
+.btn.ring-skip{outline:3px solid var(--red);outline-offset:2px;}
+#today-status{text-align:center;margin-top:10px;font-weight:700;font-size:.82rem;color:#888;min-height:16px;}
+.success-ring{position:absolute;inset:0;border-radius:20px;pointer-events:none;animation:ringFade .55s ease forwards;}
+@keyframes ringFade{0%{box-shadow:inset 0 0 0 3px var(--green)}100%{box-shadow:inset 0 0 0 0 transparent}}
+
+/* Section title */
+.sec-title{color:rgba(255,255,255,.6);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;}
+
+/* History */
+.hist-item{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);border-radius:11px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;}
+.hist-left{display:flex;align-items:center;gap:9px;}
+.hist-icon{font-size:1.2rem;}
+.hist-date{color:rgba(255,255,255,.88);font-weight:700;font-size:.83rem;}
+.hist-sub{color:rgba(255,255,255,.35);font-size:.67rem;}
+.badge{padding:3px 9px;border-radius:50px;font-size:.68rem;font-weight:700;}
+.badge-taken{background:rgba(46,204,113,.18);color:#2ecc71;}
+.badge-skip{background:rgba(231,76,60,.14);color:#e74c3c;}
+
+/* Calendar */
+.cal-grid{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:13px;margin-bottom:13px;display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+.cal-lbl{text-align:center;font-size:.6rem;font-weight:700;color:rgba(255,255,255,.3);padding-bottom:3px;text-transform:uppercase;}
+.cal-day{aspect-ratio:1;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;}
+.cal-day.empty,.cal-day.future{color:rgba(255,255,255,.16);}
+.cal-day.taken{background:rgba(46,204,113,.2);color:#2ecc71;border:1px solid rgba(46,204,113,.32);}
+.cal-day.skipped{background:rgba(231,76,60,.16);color:#e74c3c;border:1px solid rgba(231,76,60,.25);}
+.cal-day.today-c{border:2px solid var(--gold)!important;color:var(--gold)!important;}
+.cal-day.pending{background:rgba(255,255,255,.04);color:rgba(255,255,255,.38);}
+.cal-dot{width:4px;height:4px;border-radius:50%;margin-top:2px;}
+.cal-legend{display:flex;gap:11px;margin-top:4px;margin-bottom:14px;flex-wrap:wrap;}
+.cal-legend span{display:flex;align-items:center;gap:5px;color:rgba(255,255,255,.5);font-size:.72rem;}
+.cal-legend i{width:11px;height:11px;border-radius:3px;display:inline-block;}
+
+/* Settings */
+.scard{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:15px;margin-bottom:13px;animation:fadeUp .7s ease .25s both;}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.srow:last-child{border-bottom:none;}
+.slabel{color:rgba(255,255,255,.82);font-size:.85rem;font-weight:600;}
+.ssub{color:rgba(255,255,255,.35);font-size:.68rem;margin-top:1px;}
+.sinput{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:5px 9px;color:white;font-family:inherit;font-weight:700;font-size:.85rem;width:108px;text-align:right;}
+.sinput:focus{outline:none;border-color:var(--gold);}
+.sbtn{padding:6px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.09);color:white;font-family:inherit;font-weight:700;font-size:.72rem;cursor:pointer;transition:background .18s;}
+.sbtn:hover{background:rgba(255,255,255,.18);}
+
+/* Bill */
+.bill-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,.09);margin-bottom:6px;}
+.bill-total{color:#2ecc71;font-size:1.25rem;font-weight:800;}
+.bill-row{display:grid;grid-template-columns:1fr auto auto auto;gap:6px;padding:6px 2px;border-top:1px solid rgba(255,255,255,.05);font-size:.77rem;}
+.bill-sum{display:grid;grid-template-columns:1fr auto auto auto;gap:6px;padding:8px 2px 2px;border-top:2px solid rgba(255,255,255,.13);font-size:.85rem;font-weight:800;}
+
+/* Toast */
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--blue-deep);color:white;padding:10px 20px;border-radius:50px;font-weight:700;font-size:.82rem;box-shadow:0 8px 26px rgba(0,0,0,.38);z-index:1000;transition:transform .3s cubic-bezier(.34,1.56,.64,1);border:1px solid rgba(255,255,255,.13);white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="drops" id="drops"></div>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">🥛</div>
+    <div class="app-title">दूध डायरी</div>
+    <div class="app-subtitle">Daily Milk Tracker • Smart Alert System</div>
+  </div>
+
+  <!-- Notification permission banner -->
+  <div class="notif-banner" id="notif-banner" style="display:none">
+    <span style="font-size:1.3rem">🔔</span>
+    <div class="notif-banner-text">Alert time pe daily notification ke liye permission do</div>
+    <button class="btn-allow" onclick="requestNotifPerm()">Allow</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-card"><div class="stat-number" id="s-taken">0</div><div class="stat-label">✅ Liya</div></div>
+    <div class="stat-card"><div class="stat-number" id="s-skip">0</div><div class="stat-label">❌ Skip</div></div>
+    <div class="stat-card"><div class="stat-number" id="s-liters">0L</div><div class="stat-label">🥛 Total</div></div>
+  </div>
+
+  <!-- Milkman bar -->
+  <div class="milkman-bar">
+    <div class="milkman-avatar">👨‍🌾</div>
+    <div style="flex:1">
+      <div class="milkman-name" id="d-name">Ramesh Doodhwala</div>
+      <div class="milkman-ph" id="d-ph">📞 Number save nahi hai</div>
+    </div>
+    <div id="alert-time-badge"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab('today')">🏠 Aaj</div>
+    <div class="tab" onclick="switchTab('calendar')">📅 Calendar</div>
+    <div class="tab" onclick="switchTab('settings')">⚙️ Settings</div>
+  </div>
+
+  <!-- TODAY TAB -->
+  <div class="tab-content active" id="tab-today">
+
+    <!-- Alert box -->
+    <div class="alert-box" id="alert-box">
+      <div class="alert-title">🚨 Milkman Alert!</div>
+      <div class="alert-msg" id="alert-msg">Aaj doodh nahi chahiye!</div>
+
+      <!-- Acknowledge status -->
+      <div class="ack-bar" id="ack-bar">
+        <div class="ack-dot pending" id="ack-dot"></div>
+        <div>
+          <div class="ack-main-text" id="ack-main">⏳ Milkman ne abhi read nahi kiya</div>
+          <div class="ack-sub-text" id="ack-sub">Agar na sune to call karo 📞</div>
+        </div>
+      </div>
+      <button class="btn-manual-ack" id="btn-mack" onclick="markManualAck()">
+        ✅ Manually Mark Karo — Milkman ne sun liya
+      </button>
+
+      <!-- Audio options -->
+      <div class="audio-section">
+        <div class="audio-opt">
+          <div class="audio-opt-label">🔊 Auto Voice (Text-to-Speech)</div>
+          <div class="audio-opt-sub">App Hindi mein message bolega</div>
+          <div class="tts-row">
+            <button class="abtn" id="tts-btn" onclick="playTTS()">▶ Preview</button>
+            <button class="abtn green" onclick="shareWithTTS()">📱 WhatsApp + Voice</button>
+          </div>
+        </div>
+        <div class="audio-divider"><span>YA</span></div>
+        <div class="audio-opt">
+          <div class="audio-opt-label">🎙️ Apni Awaaz Mein Record Karo</div>
+          <div class="audio-opt-sub">Khud message record karo, phir bhejo</div>
+          <div id="rec-ui">
+            <button class="rec-btn" id="rec-btn" onclick="toggleRec()">
+              <span id="rec-icon">🎙️</span><span id="rec-txt">Record Shuru Karo</span>
+            </button>
+            <div class="rec-timer" id="rec-timer">⏱ <span id="rec-time">0:00</span></div>
+          </div>
+          <div id="rec-playback" style="display:none">
+            <audio id="rec-audio" controls style="width:100%;margin:7px 0;border-radius:7px;height:34px;"></audio>
+            <div style="display:flex;gap:6px">
+              <button class="abtn" onclick="reRecord()" style="flex:1">🔄 Dobara</button>
+              <button class="abtn green" onclick="shareAudio()" style="flex:2">📱 Share Karo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="share-text-btn" onclick="shareTextOnly()">💬 Sirf Text Message Bhejo</button>
+    </div>
+
+    <!-- Today input card -->
+    <div class="today-card" id="today-card">
+      <div class="today-header">
+        <span class="today-label">📅 Aaj Ka Record</span>
+        <span class="today-date-txt" id="today-date"></span>
+      </div>
+      <div style="text-align:center;color:#666;font-size:.79rem;font-weight:600;margin-bottom:4px;">Kitna Doodh Chahiye?</div>
+      <div class="qty-section">
+        <button class="qty-btn" onclick="changeQty(-0.5)">−</button>
+        <div><div class="qty-num" id="qty-num">1.0</div><div class="qty-unit">Litre</div></div>
+        <button class="qty-btn" onclick="changeQty(0.5)">+</button>
+      </div>
+
+      <!-- Editable price per litre -->
+      <div class="price-row">
+        <span class="price-lbl">Rate:</span>
+        <span style="color:#555;font-weight:700;">₹</span>
+        <input class="price-inp" id="today-price" type="number" min="1" step="1" placeholder="60" oninput="onPriceEdit()">
+        <span class="price-lbl">/ L</span>
+        <span class="price-preview" id="price-preview">= ₹60</span>
+      </div>
+
+      <div class="action-row">
+        <button class="btn btn-take" id="btn-take" onclick="recordDay('taken')">✅ Lena Hai</button>
+        <button class="btn btn-skip" id="btn-skip" onclick="recordDay('skipped')">❌ Nahi Lena</button>
+      </div>
+      <div id="today-status"></div>
+    </div>
+
+    <!-- History -->
+    <div class="sec-title">📋 Recent History</div>
+    <div id="hist-list"></div>
+  </div>
+
+  <!-- CALENDAR TAB -->
+  <div class="tab-content" id="tab-calendar">
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="cal-legend">
+      <span><i style="background:rgba(46,204,113,.35)"></i>Liya</span>
+      <span><i style="background:rgba(231,76,60,.28)"></i>Skip</span>
+      <span><i style="border:2px solid #f4c430"></i>Aaj</span>
+    </div>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div class="tab-content" id="tab-settings">
+
+    <!-- Milkman -->
+    <div class="scard">
+      <div class="sec-title">👨‍🌾 Milkman Details</div>
+      <div class="srow">
+        <div><div class="slabel">Naam</div></div>
+        <input class="sinput" id="s-mname" type="text" placeholder="Naam..." oninput="saveMilkman()">
+      </div>
+      <div class="srow">
+        <div><div class="slabel">Phone</div></div>
+        <input class="sinput" id="s-mphone" type="tel" placeholder="+91..." oninput="saveMilkman()">
+      </div>
+      <div class="srow">
+        <div>
+          <div class="slabel">Acknowledge Link</div>
+          <div class="ssub">Milkman ko WhatsApp pe bhejo — tap karne pe Read ho jayega</div>
+        </div>
+        <button class="sbtn" onclick="copyAckLink()">📋 Copy</button>
+      </div>
+    </div>
+
+    <!-- Alert time -->
+    <div class="scard">
+      <div class="sec-title">🔔 Alert Notification</div>
+      <div class="srow">
+        <div><div class="slabel">Alert Time</div><div class="ssub">Roz is waqt notification aayegi</div></div>
+        <input class="sinput" id="s-atime" type="time" value="07:00" oninput="saveAlertTime()">
+      </div>
+      <div class="srow">
+        <div><div class="slabel">Notification</div><div class="ssub" id="notif-status">Checking...</div></div>
+        <button class="sbtn" id="notif-btn" onclick="requestNotifPerm()">Enable</button>
+      </div>
+      <div id="next-notif" style="margin-top:7px;color:rgba(255,255,255,.35);font-size:.72rem;"></div>
+      <button class="sbtn" onclick="testNotif()" style="width:100%;margin-top:10px;padding:8px;font-size:.78rem;background:rgba(244,196,48,.12);border-color:rgba(244,196,48,.3);color:#f4c430;">🔔 Test Notification Abhi Bhejo</button>
+    </div>
+
+    <!-- Price & Bill -->
+    <div class="scard">
+      <div class="sec-title">💰 Default Rate & Bill</div>
+      <div class="srow">
+        <div><div class="slabel">Default Rate (₹/L)</div><div class="ssub">Aaj ke card mein yahi dikhega (editable)</div></div>
+        <input class="sinput" id="s-price" type="number" min="1" oninput="savePrice()">
+      </div>
+      <div id="bill-head" style="margin-top:11px;"></div>
+      <div id="bill-body"></div>
+    </div>
+
+    <button onclick="clearAll()" style="width:100%;padding:12px;border-radius:12px;border:1px solid rgba(231,76,60,.3);background:rgba(231,76,60,.12);color:#e74c3c;font-family:inherit;font-weight:700;font-size:.87rem;cursor:pointer;margin-bottom:8px;">🗑️ Saara Data Clear Karo</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ────────────────────────────────────────────
+let REC = JSON.parse(localStorage.getItem('md_rec') || '{}');
+let SET = JSON.parse(localStorage.getItem('md_set') || '{}');
+if (!SET.milkmanName)  SET.milkmanName  = 'Ramesh Doodhwala';
+if (!SET.milkmanPhone) SET.milkmanPhone = '';
+if (!SET.price)        SET.price        = 60;
+if (!SET.alertTime)    SET.alertTime    = '07:00';
+
+const TODAY = new Date();
+const TKEY  = fmtKey(TODAY);
+let qty     = 1.0;
+let notifInterval = null;
+
+// ── INIT ─────────────────────────────────────────────
+(function init() {
+  createDrops();
+  document.getElementById('today-date').textContent  = fmtDisp(TODAY);
+  document.getElementById('today-price').value       = SET.price;
+  document.getElementById('s-mname').value           = SET.milkmanName;
+  document.getElementById('s-mphone').value          = SET.milkmanPhone;
+  document.getElementById('s-price').value           = SET.price;
+  document.getElementById('s-atime').value           = SET.alertTime;
+  updatePricePreview();
+  updateMilkmanBar();
+  updateAlertBadge();
+  checkNotif();
+  startNotifLoop();
+  checkAckURL();
+  if (REC[TKEY]) loadTodayStatus();
+  refreshStats();
+  renderHist();
+})();
+
+// ── DROPS ─────────────────────────────────────────────
+function createDrops() {
+  const c = document.getElementById('drops');
+  for (let i=0; i<13; i++) {
+    const d = document.createElement('div');
+    d.className = 'drop';
+    Object.assign(d.style, {
+      left: Math.random()*100+'%',
+      width: (4+Math.random()*5)+'px', height: (6+Math.random()*8)+'px',
+      animationDuration: (5+Math.random()*7)+'s',
+      animationDelay: (Math.random()*8)+'s'
+    });
+    c.appendChild(d);
+  }
+}
+
+// ── HELPERS ───────────────────────────────────────────
+function fmtKey(d) { return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`; }
+function p2(n) { return String(n).padStart(2,'0'); }
+function fmtDisp(d) {
+  return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()] + ', ' + d.getDate() + ' ' +
+    ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+}
+function saveRec() { localStorage.setItem('md_rec', JSON.stringify(REC)); }
+function saveSet() { localStorage.setItem('md_set', JSON.stringify(SET)); }
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── QTY & PRICE ───────────────────────────────────────
+function changeQty(d) {
+  qty = Math.max(0.5, Math.min(10, qty+d));
+  document.getElementById('qty-num').textContent = qty.toFixed(1);
+  updatePricePreview();
+}
+function onPriceEdit() {
+  const p = parseFloat(document.getElementById('today-price').value);
+  if (!isNaN(p) && p > 0) {
+    SET.price = p;
+    document.getElementById('s-price').value = p;
+    saveSet();
+    renderBill();
+  }
+  updatePricePreview();
+}
+function updatePricePreview() {
+  const p = parseFloat(document.getElementById('today-price').value) || SET.price;
+  document.getElementById('price-preview').textContent = `= ₹${(qty*p).toFixed(0)}`;
+}
+function savePrice() {
+  const p = parseFloat(document.getElementById('s-price').value);
+  if (!isNaN(p) && p > 0) {
+    SET.price = p;
+    document.getElementById('today-price').value = p;
+    updatePricePreview();
+    saveSet();
+    renderHist();
+    renderBill();
+  }
+}
+
+// ── RECORD TODAY ──────────────────────────────────────
+function recordDay(status) {
+  const price = parseFloat(document.getElementById('today-price').value) || SET.price;
+  const q     = status === 'skipped' ? 0 : qty;
+  REC[TKEY] = { status, qty: q, price, amount: q*price,
+    time: new Date().toLocaleTimeString('hi-IN'), ackStatus: status==='skipped'?'pending':null, ackTime: null };
+  saveRec();
+  if (status === 'skipped') {
+    showAlertBox();
+    toast('❌ Skip! Milkman alert ready hai');
+  } else {
+    hideAlertBox();
+    toast(`✅ ${q}L @ ₹${price}/L = ₹${(q*price).toFixed(0)} record!`);
+    const ring = document.createElement('div'); ring.className = 'success-ring';
+    document.getElementById('today-card').appendChild(ring);
+    setTimeout(() => ring.remove(), 600);
+  }
+  loadTodayStatus(); refreshStats(); renderHist();
+}
+function loadTodayStatus() {
+  const r = REC[TKEY]; if (!r) return;
+  const el = document.getElementById('today-status');
+  document.getElementById('btn-take').classList.remove('ring-take');
+  document.getElementById('btn-skip').classList.remove('ring-skip');
+  if (r.status === 'taken') {
+    el.innerHTML = `<span style="color:#2ecc71">✅ ${r.qty}L @ ₹${r.price}/L = ₹${r.amount?.toFixed(0)||''} — ${r.time}</span>`;
+    document.getElementById('btn-take').classList.add('ring-take');
+    hideAlertBox();
+  } else {
+    el.innerHTML = `<span style="color:#e74c3c">❌ Skip kiya — ${r.time}</span>`;
+    document.getElementById('btn-skip').classList.add('ring-skip');
+    showAlertBox();
+  }
+}
+
+// ── ALERT BOX ─────────────────────────────────────────
+function showAlertBox() {
+  document.getElementById('alert-msg').textContent = `${SET.milkmanName||'Doodhwale'} ko batao — aaj doodh nahi chahiye!`;
+  document.getElementById('alert-box').style.display = 'block';
+  renderAck();
+}
+function hideAlertBox() { document.getElementById('alert-box').style.display = 'none'; }
+
+// ── ACKNOWLEDGE ───────────────────────────────────────
+function renderAck() {
+  const r = REC[TKEY]; if (!r || r.status !== 'skipped') return;
+  const dot  = document.getElementById('ack-dot');
+  const main = document.getElementById('ack-main');
+  const sub  = document.getElementById('ack-sub');
+  const btn  = document.getElementById('btn-mack');
+  if (r.ackStatus === 'read') {
+    dot.className = 'ack-dot read';
+    main.textContent = '✅ Milkman ne read kar liya!';
+    sub.textContent  = r.ackTime ? `⏰ ${r.ackTime}` : '';
+    btn.textContent  = '✅ Acknowledge Ho Gaya'; btn.classList.add('done'); btn.disabled = true;
+  } else {
+    dot.className = 'ack-dot pending';
+    main.textContent = '⏳ Milkman ne abhi read nahi kiya';
+    sub.textContent  = 'Agar na sune to call karo 📞';
+    btn.textContent  = '✅ Manually Mark Karo — Milkman ne sun liya';
+    btn.classList.remove('done'); btn.disabled = false;
+  }
+}
+function markManualAck() {
+  if (!REC[TKEY]) return;
+  REC[TKEY].ackStatus = 'read'; REC[TKEY].ackTime = new Date().toLocaleTimeString('hi-IN');
+  saveRec(); renderAck(); renderHist();
+  toast('✅ Acknowledge mark ho gaya!');
+}
+function getAckLink() {
+  // If running as local file, can't create a real shareable link
+  // Instead create a special deep-link style URL that works when reopened
+  const base = location.href.split('?')[0].split('#')[0];
+  return `${base}?ack=${TKEY}&tok=mm`;
+}
+function copyAckLink() {
+  const link = getAckLink();
+  // Warn if local file
+  if(location.protocol === 'file:') {
+    toast('⚠️ App online host karo — file:// link kaam nahi karega!');
+    setTimeout(() => prompt('Yeh link milkman ke phone pe kaam tabhi karega jab app online ho. Abhi copy karo (is phone pe khulega):', link), 500);
+    return;
+  }
+  navigator.clipboard.writeText(link)
+    .then(() => toast('📋 Link copy ho gaya! WhatsApp pe bhejo'))
+    .catch(() => { prompt('Yeh link copy karo aur WhatsApp pe bhejo:', link); });
+}
+function checkAckURL() {
+  const p = new URLSearchParams(location.search);
+  if (p.get('tok') === 'mm' && p.get('ack')) {
+    const key = p.get('ack');
+    if (REC[key]) {
+      REC[key].ackStatus = 'read'; REC[key].ackTime = new Date().toLocaleTimeString('hi-IN');
+      saveRec();
+      setTimeout(() => { toast('✅ Milkman ne message read kar liya!'); renderAck(); renderHist(); }, 600);
+    }
+    history.replaceState({}, '', location.pathname);
+  }
+}
+
+// ── MILKMAN ───────────────────────────────────────────
+function saveMilkman() {
+  SET.milkmanName  = document.getElementById('s-mname').value;
+  SET.milkmanPhone = document.getElementById('s-mphone').value;
+  saveSet(); updateMilkmanBar();
+}
+function updateMilkmanBar() {
+  document.getElementById('d-name').textContent = SET.milkmanName || 'Milkman';
+  document.getElementById('d-ph').textContent   = SET.milkmanPhone ? `📞 ${SET.milkmanPhone}` : '📞 Number save nahi hai';
+}
+function updateAlertBadge() {
+  const el = document.getElementById('alert-time-badge');
+  el.innerHTML = SET.alertTime ? `<div class="notif-badge">🔔 ${SET.alertTime}</div>` : '';
+}
+
+// ── NOTIFICATIONS ─────────────────────────────────────
+function checkNotif() {
+  if (!('Notification' in window)) {
+    document.getElementById('notif-status').textContent = '❌ Browser support nahi karta';
+    document.getElementById('notif-btn').style.display  = 'none';
+    return;
+  }
+  const perm = Notification.permission;
+  const banner = document.getElementById('notif-banner');
+  const st   = document.getElementById('notif-status');
+  const btn  = document.getElementById('notif-btn');
+  if (perm === 'granted') {
+    banner.style.display = 'none'; st.textContent = '✅ Notifications on hain';
+    btn.textContent = 'On ✅'; btn.style.background = 'rgba(46,204,113,.2)'; btn.disabled = true;
+  } else if (perm === 'denied') {
+    banner.style.display = 'none'; st.textContent = '❌ Denied — Browser settings se allow karo';
+    btn.textContent = 'Denied'; btn.disabled = true;
+  } else {
+    banner.style.display = 'flex'; st.textContent = '⚠️ Permission nahi mili abhi tak';
+    btn.textContent = 'Allow Karo'; btn.disabled = false;
+  }
+  updateNextNotifTime();
+}
+async function requestNotifPerm() {
+  if (!('Notification' in window)) return;
+  await Notification.requestPermission();
+  checkNotif();
+  toast('🔔 Notifications on! Roz ' + SET.alertTime + ' pe reminder milega');
+}
+function saveAlertTime() {
+  SET.alertTime = document.getElementById('s-atime').value;
+  saveSet(); updateAlertBadge(); updateNextNotifTime();
+  toast('🔔 Alert time save: ' + SET.alertTime);
+}
+function updateNextNotifTime() {
+  const el = document.getElementById('next-notif'); if (!SET.alertTime) return;
+  const [h,m] = SET.alertTime.split(':').map(Number);
+  const nxt = new Date(); nxt.setHours(h,m,0,0);
+  if (nxt <= new Date()) nxt.setDate(nxt.getDate()+1);
+  const diff = nxt - new Date();
+  el.textContent = `⏰ Agli notification: ${Math.floor(diff/3600000)}h ${Math.floor((diff%3600000)/60000)}m mein`;
+}
+function startNotifLoop() {
+  if (notifInterval) clearInterval(notifInterval);
+  // Check every 10 seconds for better accuracy
+  notifInterval = setInterval(checkFireNotif, 10000);
+  checkFireNotif();
+  // Also check when user comes back to the app
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) checkFireNotif(); });
+  window.addEventListener('focus', checkFireNotif);
+}
+function checkFireNotif() {
+  if (Notification.permission !== 'granted' || !SET.alertTime) return;
+  const now = new Date();
+  const [h,m] = SET.alertTime.split(':').map(Number);
+  // Fire if within the correct hour:minute (regardless of seconds)
+  if (now.getHours() !== h || now.getMinutes() !== m) return;
+  const fired = localStorage.getItem('md_last_notif');
+  const todayStr = fmtKey(now);
+  if (fired === todayStr) return;
+  const r = REC[todayStr];
+  if (r && r.status === 'taken') return;
+  localStorage.setItem('md_last_notif', todayStr);
+  const title = r && r.status==='skipped' ? '🚨 Milkman Alert!' : '🥛 Doodh Record Karo';
+  const body  = r && r.status==='skipped'
+    ? `${SET.milkmanName||'Doodhwale'} ko batao — aaj doodh nahi chahiye!`
+    : 'Aaj ka doodh abhi record nahi hua. App kholo!';
+  try {
+    const n = new Notification(title, { body, tag:'milk', requireInteraction: true,
+      icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🥛</text></svg>' });
+    n.onclick = () => { window.focus(); n.close(); };
+  } catch(e) { console.warn('Notification error:', e); }
+}
+function testNotif() {
+  if (!('Notification' in window)) { toast('❌ Browser notifications support nahi karta'); return; }
+  if (Notification.permission !== 'granted') { toast('❌ Permission: ' + Notification.permission + ' — Settings se allow karo!'); return; }
+  try {
+    const n = new Notification('🥛 Test — Doodh Diary', {
+      body: 'Notification kaam kar rahi hai! ✅',
+      tag: 'milk-test-' + Date.now()
+    });
+    n.onclick = () => { window.focus(); n.close(); };
+    toast('✅ Notification bheji gayi!');
+  } catch(e) {
+    toast('❌ Error: ' + e.message);
+  }
+}
+
+// ── STATS ─────────────────────────────────────────────
+function refreshStats() {
+  const vs = Object.values(REC);
+  document.getElementById('s-taken').textContent  = vs.filter(r=>r.status==='taken').length;
+  document.getElementById('s-skip').textContent   = vs.filter(r=>r.status==='skipped').length;
+  document.getElementById('s-liters').textContent = vs.reduce((s,r)=>s+(r.qty||0),0).toFixed(1)+'L';
+}
+
+// ── HISTORY ───────────────────────────────────────────
+function renderHist() {
+  const el   = document.getElementById('hist-list');
+  const keys = Object.keys(REC).sort((a,b)=>b.localeCompare(a)).slice(0,7);
+  if (!keys.length) { el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,.22);padding:16px;font-size:.82rem;">Abhi koi record nahi</div>'; return; }
+  el.innerHTML = keys.map(key => {
+    const r = REC[key], d = new Date(key+'T00:00:00');
+    const lbl = key===TKEY ? 'Aaj' : fmtDisp(d);
+    const price = r.price || SET.price;
+    const amt   = (r.qty*price).toFixed(0);
+    const ackBit = r.status==='skipped' ? (r.ackStatus==='read'?' ✅':' ⏳') : '';
+    const badge  = r.status==='taken'
+      ? `<div style="text-align:right"><span class="badge badge-taken">${r.qty}L ✅</span><div style="color:rgba(255,255,255,.3);font-size:.65rem;margin-top:2px;">₹${amt}</div></div>`
+      : `<span class="badge badge-skip">Skip ❌${ackBit}</span>`;
+    return `<div class="hist-item">
+      <div class="hist-left"><div class="hist-icon">${r.status==='taken'?'🥛':'🚫'}</div>
+      <div><div class="hist-date">${lbl}</div><div class="hist-sub">${r.time||key}</div></div></div>
+      ${badge}</div>`;
+  }).join('');
+}
+
+// ── CALENDAR ──────────────────────────────────────────
+function renderCal() {
+  const g = document.getElementById('cal-grid');
+  const now = new Date(), y = now.getFullYear(), mo = now.getMonth();
+  const mnames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const first = new Date(y,mo,1).getDay();
+  const days  = new Date(y,mo+1,0).getDate();
+  g.innerHTML =
+    `<div style="grid-column:1/-1;color:rgba(255,255,255,.58);font-size:.69rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;">${mnames[mo]} ${y}</div>` +
+    ['S','M','T','W','T','F','S'].map(l=>`<div class="cal-lbl">${l}</div>`).join('') +
+    Array(first).fill('<div class="cal-day empty"></div>').join('') +
+    Array.from({length:days},(_,i)=>{
+      const d=i+1, key=`${y}-${p2(mo+1)}-${p2(d)}`, r=REC[key];
+      const isToday = key===TKEY, isFut = new Date(y,mo,d)>now && !isToday;
+      let cls='cal-day', inner=d;
+      if (isToday) cls+=' today-c';
+      else if (isFut) cls+=' future';
+      else if (r?.status==='taken')   { cls+=' taken';   inner=`${d}<div class="cal-dot" style="background:#2ecc71"></div>`; }
+      else if (r?.status==='skipped') { cls+=' skipped'; inner=`${d}<div class="cal-dot" style="background:#e74c3c"></div>`; }
+      else cls+=' pending';
+      return `<div class="${cls}">${inner}</div>`;
+    }).join('');
+}
+
+// ── BILL ──────────────────────────────────────────────
+function renderBill() {
+  const now=new Date(), y=now.getFullYear(), mo=now.getMonth();
+  const mname=['January','February','March','April','May','June','July','August','September','October','November','December'][mo];
+  let totL=0, totAmt=0, rows=[];
+  Object.entries(REC).filter(([k,r])=>{
+    const d=new Date(k+'T00:00:00');
+    return d.getFullYear()===y && d.getMonth()===mo && r.status==='taken';
+  }).sort(([a],[b])=>a.localeCompare(b)).forEach(([k,r])=>{
+    const p=r.price||SET.price, a=r.qty*p;
+    totL+=r.qty; totAmt+=a;
+    rows.push({date:fmtDisp(new Date(k+'T00:00:00')), qty:r.qty, p, a});
+  });
+  document.getElementById('bill-head').innerHTML =
+    `<div class="bill-head"><span style="color:rgba(255,255,255,.5);font-size:.79rem;">${mname} ${y} • ${rows.length} din</span><span class="bill-total">₹${totAmt.toFixed(0)}</span></div>
+     <div style="display:flex;justify-content:space-between;font-size:.77rem;color:rgba(255,255,255,.38);">
+       <span>Total: <b style="color:#f4c430">${totL.toFixed(1)}L</b></span>
+       <span>Avg: ₹${rows.length?(totAmt/totL).toFixed(0):SET.price}/L</span>
+     </div>`;
+  const bd = document.getElementById('bill-body');
+  if (!rows.length) { bd.innerHTML='<div style="text-align:center;color:rgba(255,255,255,.18);font-size:.78rem;padding:9px 0">Is mahine koi record nahi</div>'; return; }
+  bd.innerHTML = `<div style="margin-top:9px">
+    <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:6px;padding:0 2px 4px;font-size:.62rem;color:rgba(255,255,255,.27);font-weight:700;text-transform:uppercase;">
+      <span>Tarikh</span><span>Qty</span><span>Rate</span><span>Amt</span></div>
+    ${rows.map(r=>`<div class="bill-row">
+      <span style="color:rgba(255,255,255,.68)">${r.date}</span>
+      <span style="color:#f4c430;font-weight:700">${r.qty.toFixed(1)}L</span>
+      <span style="color:rgba(255,255,255,.42)">₹${r.p}</span>
+      <span style="color:rgba(255,255,255,.82);font-weight:700">₹${r.a.toFixed(0)}</span>
+    </div>`).join('')}
+    <div class="bill-sum">
+      <span style="color:white">Total</span>
+      <span style="color:#f4c430">${totL.toFixed(1)}L</span><span></span>
+      <span style="color:#2ecc71">₹${totAmt.toFixed(0)}</span>
+    </div></div>`;
+}
+
+// ── SHARE ─────────────────────────────────────────────
+function buildMsg(includeLink) {
+  const name=SET.milkmanName||'Doodhwale Bhai', date=fmtDisp(TODAY);
+  const link = includeLink ? `\n\n✅ Padhne ke baad tap karo:\n${getAckLink()}` : '';
+  return `🥛 Namaste *${name}*!\n\nAaj *${date}* ko doodh mat dena. Aaj zaroorat nahi hai.${link}\n\nShukriya! 🙏\n_(Doodh Diary App)_`;
+}
+function openWA(msg) {
+  const ph = SET.milkmanPhone.replace(/\D/g,'');
+  window.open(ph ? `https://wa.me/91${ph}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+}
+function shareTextOnly() { openWA(buildMsg(true)); }
+
+// ── TTS ───────────────────────────────────────────────
+let ttsOn=false;
+function playTTS() {
+  if (!window.speechSynthesis) { toast('❌ Browser TTS support nahi karta'); return; }
+  window.speechSynthesis.cancel();
+  if (ttsOn) { ttsOn=false; document.getElementById('tts-btn').textContent='▶ Preview'; return; }
+  const days=['Ravivar','Somvar','Mangalvar','Budhvar','Guruvar','Shukravar','Shanivar'];
+  const u = new SpeechSynthesisUtterance(`Namaste ${SET.milkmanName||'Doodhwale bhai'}! Aaj ${days[TODAY.getDay()]} ko doodh nahi chahiye. Kripya doodh mat laana. Shukriya.`);
+  const vs = window.speechSynthesis.getVoices();
+  const hi = vs.find(v=>v.lang.startsWith('hi')) || vs.find(v=>v.lang.startsWith('en-IN'));
+  if (hi) u.voice=hi; u.lang=hi?hi.lang:'hi-IN'; u.rate=0.88;
+  ttsOn=true; document.getElementById('tts-btn').textContent='⏹ Roko';
+  u.onend=u.onerror=()=>{ttsOn=false;document.getElementById('tts-btn').textContent='▶ Preview';};
+  window.speechSynthesis.speak(u);
+}
+function shareWithTTS() { playTTS(); setTimeout(()=>openWA(buildMsg(true)), 600); }
+if (window.speechSynthesis) { window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices(); window.speechSynthesis.getVoices(); }
+
+// ── RECORDER ──────────────────────────────────────────
+let mRec=null, chunks=[], blob=null, recInt=null, secs=0;
+async function toggleRec() { mRec&&mRec.state==='recording' ? stopRec() : await startRec(); }
+async function startRec() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    chunks=[];
+    const mime = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'audio/webm';
+    mRec = new MediaRecorder(stream,{mimeType:mime});
+    mRec.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
+    mRec.onstop = () => {
+      blob = new Blob(chunks,{type:mRec.mimeType});
+      document.getElementById('rec-audio').src = URL.createObjectURL(blob);
+      document.getElementById('rec-playback').style.display='block';
+      document.getElementById('rec-ui').style.display='none';
+      stream.getTracks().forEach(t=>t.stop());
+    };
+    mRec.start(100); secs=0;
+    document.getElementById('rec-timer').style.display='block';
+    recInt=setInterval(()=>{ secs++; document.getElementById('rec-time').textContent=`${Math.floor(secs/60)}:${p2(secs%60)}`; if(secs>=30) stopRec(); },1000);
+    document.getElementById('rec-btn').classList.add('recording');
+    document.getElementById('rec-txt').textContent='Rokne ke liye tap karo';
+    document.getElementById('rec-icon').textContent='⏹';
+  } catch(e) { toast(e.name==='NotAllowedError'?'❌ Microphone permission do!':'❌ Mic nahi mili'); }
+}
+function stopRec() {
+  if(mRec&&mRec.state!=='inactive') mRec.stop();
+  clearInterval(recInt);
+  document.getElementById('rec-btn').classList.remove('recording');
+  document.getElementById('rec-txt').textContent='Record Shuru Karo';
+  document.getElementById('rec-icon').textContent='🎙️';
+  document.getElementById('rec-timer').style.display='none';
+}
+function reRecord() { blob=null; document.getElementById('rec-playback').style.display='none'; document.getElementById('rec-ui').style.display='block'; }
+async function shareAudio() {
+  if(!blob){toast('Pehle record karo!');return;}
+  const ext=blob.type.includes('ogg')?'ogg':blob.type.includes('mp4')?'mp4':'webm';
+  const file=new File([blob],`doodh-alert.${ext}`,{type:blob.type});
+  const ph = SET.milkmanPhone.replace(/\D/g,'');
+  const waUrl = ph ? `https://wa.me/91${ph}` : `https://wa.me/`;
+  // Try Web Share API first (mobile)
+  if(navigator.canShare && navigator.canShare({files:[file]})) {
+    try {
+      await navigator.share({title:'Doodh Alert 🥛', text: buildMsg(false), files:[file]});
+      toast('✅ Audio share ho gaya!');
+      return;
+    } catch(e) {
+      if(e.name === 'AbortError') { toast('❌ Share cancel hua'); return; }
+    }
+  }
+  // Fallback: download audio + open WhatsApp
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:`doodh-alert.${ext}`});
+  a.click();
+  toast('⬇️ Audio download ho raha hai...');
+  setTimeout(() => {
+    const confirmed = confirm(
+      '📱 Audio download ho gaya!\n\nWhatsApp pe bhejne ke liye:\n1. OK dabao — WhatsApp khulega\n2. Milkman ka chat open karo\n3. Attachment (📎) → Downloads → "doodh-alert.' + ext + '" select karo'
+    );
+    if(confirmed) window.open(waUrl, '_blank');
+  }, 1200);
+}
+
+// ── TAB SWITCH ────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['today','calendar','settings'][i]===name));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='calendar'){renderCal();}
+  if(name==='settings'){renderBill();checkNotif();updateNextNotifTime();}
+}
+
+// ── CLEAR ALL ─────────────────────────────────────────
+function clearAll() {
+  if(!confirm('Saara data delete ho jayega. Sure ho?')) return;
+  REC={}; saveRec(); hideAlertBox();
+  document.getElementById('today-status').innerHTML='';
+  document.getElementById('btn-take').classList.remove('ring-take');
+  document.getElementById('btn-skip').classList.remove('ring-skip');
+  refreshStats(); renderHist();
+  toast('🗑️ Data clear ho gaya');
+}
+</script>
+</body>
+</html>
