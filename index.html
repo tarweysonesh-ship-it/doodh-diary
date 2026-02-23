@@ -378,6 +378,10 @@ let notifInterval = null;
 // ── INIT ─────────────────────────────────────────────
 (function init() {
   createDrops();
+  // Register Service Worker for notifications (Android Chrome)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW register failed:', e));
+  }
   document.getElementById('today-date').textContent  = fmtDisp(TODAY);
   document.getElementById('today-price').value       = SET.price;
   document.getElementById('s-mname').value           = SET.milkmanName;
@@ -624,11 +628,24 @@ function startNotifLoop() {
   document.addEventListener('visibilitychange', () => { if (!document.hidden) checkFireNotif(); });
   window.addEventListener('focus', checkFireNotif);
 }
+async function sendNotif(title, body, tag) {
+  const icon = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🥛</text></svg>';
+  if ('serviceWorker' in navigator) {
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      await reg.showNotification(title, { body, tag, icon, requireInteraction: true });
+      return;
+    } catch(e) { console.warn('SW notif failed:', e); }
+  }
+  try {
+    const n = new Notification(title, { body, tag, icon });
+    n.onclick = () => { window.focus(); n.close(); };
+  } catch(e) { console.warn('Notif error:', e); }
+}
 function checkFireNotif() {
   if (Notification.permission !== 'granted' || !SET.alertTime) return;
   const now = new Date();
   const [h,m] = SET.alertTime.split(':').map(Number);
-  // Fire if within the correct hour:minute (regardless of seconds)
   if (now.getHours() !== h || now.getMinutes() !== m) return;
   const fired = localStorage.getItem('md_last_notif');
   const todayStr = fmtKey(now);
@@ -640,25 +657,13 @@ function checkFireNotif() {
   const body  = r && r.status==='skipped'
     ? `${SET.milkmanName||'Doodhwale'} ko batao — aaj doodh nahi chahiye!`
     : 'Aaj ka doodh abhi record nahi hua. App kholo!';
-  try {
-    const n = new Notification(title, { body, tag:'milk', requireInteraction: true,
-      icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🥛</text></svg>' });
-    n.onclick = () => { window.focus(); n.close(); };
-  } catch(e) { console.warn('Notification error:', e); }
+  sendNotif(title, body, 'milk');
 }
 function testNotif() {
   if (!('Notification' in window)) { toast('❌ Browser notifications support nahi karta'); return; }
   if (Notification.permission !== 'granted') { toast('❌ Permission: ' + Notification.permission + ' — Settings se allow karo!'); return; }
-  try {
-    const n = new Notification('🥛 Test — Doodh Diary', {
-      body: 'Notification kaam kar rahi hai! ✅',
-      tag: 'milk-test-' + Date.now()
-    });
-    n.onclick = () => { window.focus(); n.close(); };
-    toast('✅ Notification bheji gayi!');
-  } catch(e) {
-    toast('❌ Error: ' + e.message);
-  }
+  sendNotif('🥛 Test — Doodh Diary', 'Notification kaam kar rahi hai! ✅', 'milk-test-' + Date.now());
+  toast('✅ Notification bheji gayi!');
 }
 
 // ── STATS ─────────────────────────────────────────────
